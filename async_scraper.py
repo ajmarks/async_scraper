@@ -4,47 +4,12 @@ import functools
 import logging
 import queue
 from threading     import Thread
+from misc          import catch_errors
 from record_worker import RecordWorker
 
 # Version handling
 if not hasattr(asyncio, 'ensure_future'):
     asyncio.ensure_future = asyncio.async
-
-
-#@asyncio.coroutine
-#def http_request(method,  url, *args, **kwargs):
-#    conn = aiohttp.ProxyConnector(proxy="http://proxy.crawlera.com:8010",
-#                proxy_auth=aiohttp.BasicAuth('amarks', 'ZOY172Uthq'))
-#    coro = aiohttp.request('GET', url, *args, connector=conn, **kwargs)
-#    return (yield from asyncio.wait_for(coro, timeout))
-#@asyncio.coroutine
-#def get(url, *args, **kwargs):
-#    return http_request('get', url, *args, **kwargs)
-#@asyncio.coroutine
-#def post(url, *args, **kwargs):
-#    return http_request('post', url, *args, **kwargs)
-
-def catch_errors(logger):
-    def func_wrapper(f):
-        @functools.wraps(f)
-        @asyncio.coroutine
-        def async_wrapper(*args, **kwargs):
-            try:
-                return (yield from f(*args, **kwargs))
-            except Exception as e:
-                logger.warning('Unhandled exception caught', exc_info=True)
-        
-        @functools.wraps(f)
-        def blocking_wrapper(*args, **kwargs):
-            try:
-                return f(*args, **kwargs)
-            except Exception as e:
-                logger.warning('Unhandled exception caught', exc_info=True)    
-        if asyncio.iscoroutinefunction(f):
-            return async_wrapper
-        else:
-            return blocking_wrapper
-    return func_wrapper
 
 
 class AsyncScraper(object):
